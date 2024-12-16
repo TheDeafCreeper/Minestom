@@ -25,8 +25,6 @@ import net.minestom.server.sound.SoundEvent
 
 
 fun main() {
-    println("Hello World!")
-
     val server = MinecraftServer.init()
 
     // Create Instance
