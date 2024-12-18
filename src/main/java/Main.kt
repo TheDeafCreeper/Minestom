@@ -1,11 +1,11 @@
 package com.thedeafcreeper
 
+import group.aelysium.rustyconnector.MinestomRustyConnector
+import group.aelysium.rustyconnector.RustyConnector
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.minestom.server.MinecraftServer
 import net.minestom.server.coordinate.Pos
-import net.minestom.server.entity.Entity
-import net.minestom.server.entity.EntityCreature
 import net.minestom.server.entity.EntityType
 import net.minestom.server.entity.GameMode
 import net.minestom.server.entity.LivingEntity
@@ -13,11 +13,8 @@ import net.minestom.server.entity.Player
 import net.minestom.server.entity.damage.Damage
 import net.minestom.server.event.entity.EntityAttackEvent
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent
-import net.minestom.server.event.player.PlayerBlockInteractEvent
-import net.minestom.server.event.player.PlayerEntityInteractEvent
-import net.minestom.server.event.player.PlayerUseItemEvent
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent
-import net.minestom.server.instance.Instance
+import net.minestom.server.extras.velocity.VelocityProxy
 import net.minestom.server.instance.LightingChunk
 import net.minestom.server.instance.block.Block
 import net.minestom.server.item.Material
@@ -166,8 +163,25 @@ fun main() {
         if (target.health <= 0.0) target.kill()
     }
 
-    server.start("0.0.0.0", 25565)
-    println("Server Running!")
+    MinecraftServer.getSchedulerManager().buildShutdownTask {
+        try {
+            RustyConnector.unregister()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    server.start("0.0.0.0", 25568)
+    MinecraftServer.LOGGER.info("Server Running!")
+
+    VelocityProxy.enable("lezMKkSrqlkP") // This is a local machine proxy so it doesn't matter that I'm leaking this.
+                                                // It should probably be replaced with a better system though.
+
+    MinestomRustyConnector(
+        instanceManager.getInstance(
+            instanceContainer.uniqueId
+        )
+    )
 }
 
 fun createEntity(entityType: EntityType): LivingEntity {
