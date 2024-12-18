@@ -12,6 +12,7 @@ import net.minestom.server.entity.LivingEntity
 import net.minestom.server.entity.Player
 import net.minestom.server.entity.damage.Damage
 import net.minestom.server.event.entity.EntityAttackEvent
+import net.minestom.server.event.entity.EntityDeathEvent
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent
 import net.minestom.server.extras.velocity.VelocityProxy
@@ -19,6 +20,8 @@ import net.minestom.server.instance.LightingChunk
 import net.minestom.server.instance.block.Block
 import net.minestom.server.item.Material
 import net.minestom.server.sound.SoundEvent
+import net.minestom.server.timer.TaskSchedule
+import java.time.Duration
 
 
 fun main() {
@@ -155,12 +158,16 @@ fun main() {
 
         if (target !is LivingEntity) return@addListener
 
-        if (event.entity is Player && event.entity.velocity.y < 0.0) {
+        if (event.entity is Player && event.entity.velocity.y < -1.6) {
             target.damage(Damage.fromEntity(event.entity, 1.5f))
             event.entity.instance.playSound(Sound.sound(SoundEvent.ENTITY_PLAYER_ATTACK_CRIT.key(), Sound.Source.MASTER, 1f, 1f), target.position)
         } else target.damage(Damage.fromEntity(event.entity, 1f))
 
         if (target.health <= 0.0) target.kill()
+    }
+
+    globalEventHandler.addListener(EntityDeathEvent::class.java) { event: EntityDeathEvent ->
+        event.entity.scheduleRemove(Duration.ofSeconds(1))
     }
 
     MinecraftServer.getSchedulerManager().buildShutdownTask {
